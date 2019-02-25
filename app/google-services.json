@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "836604323481",
+    "firebase_url": "https://snapanote-c4ff5.firebaseio.com",
+    "project_id": "snapanote-c4ff5",
+    "storage_bucket": "snapanote-c4ff5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836604323481:android:669491d2c962d745",
+        "android_client_info": {
+          "package_name": "com.example.snapanote"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "836604323481-gpo0a2pipb0sks09ujh9hp8rs9viuqv9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.snapanote",
+            "certificate_hash": "ffd547e9b8cf5611fd5c3d27afa60ee4f61d1df2"
+          }
+        },
+        {
+          "client_id": "836604323481-psi5gee9qa78jpo6b0b8vku8lbakc4a0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVDfYpCLYekKVVkDUysurXPVEHjVym6Jg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "836604323481-psi5gee9qa78jpo6b0b8vku8lbakc4a0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
