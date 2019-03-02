@@ -1,5 +1,6 @@
 package com.example.snapanote.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,7 +15,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.snapanote.Controllers.Base;
+import com.example.snapanote.Activities.Base;
+import com.example.snapanote.Activities.LoggedIn;
 import com.example.snapanote.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -50,137 +52,127 @@ public class Login extends Fragment {
         //getting the FirebaseAuth instance
         auth = FirebaseAuth.getInstance();
 
-        Register.setOnClickListener(new View.OnClickListener(){
+        if(auth.getCurrentUser() != null)
+        {
+            Intent intent = new Intent(getActivity(),LoggedIn.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
+        else {
 
-            public void onClick(View view){
+            Register.setOnClickListener(new View.OnClickListener() {
 
-                //If the signup text view is clicked, go to register fragment
-                ((Base)getActivity()).setViewPager(1);
+                public void onClick(View view) {
 
-            }
-
-
-        });
-
-        Login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                //In case the rare error will be visible, clear it after every button click
-                Error.setVisibility(View.GONE);
-
-
-                //get given email and passwords
-                final String email = Email.getText().toString();
-                final String password = Password.getText().toString();
-
-
-                //error checking
-
-                //if email is empty
-                if(email.isEmpty())
-                {
-                    Email.setError("Email is empty");
-                    Email.requestFocus();
-                    return;
-                }
-
-                //if the email given is not valid
-                if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-                {
-                    Email.setError("Please enter a valid email");
-                    Email.requestFocus();
-                    return;
+                    //If the signup text view is clicked, go to register fragment
+                    ((Base) getActivity()).setViewPager(1);
 
                 }
 
-                //if password is empty
-                if(password.isEmpty())
-                {
-                    Password.setError("Password is empty");
-                    Password.requestFocus();
-                    return;
-                }
 
-                //if password is smaller than 6
-                if(password.length()<6)
-                {
-                    Password.setError("Minimum password length is 6");
-                    Password.requestFocus();
-                    return;
-                }
+            });
+
+            Login.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    //In case the rare error will be visible, clear it after every button click
+                    Error.setVisibility(View.GONE);
 
 
-                //Hiding buttons, showing progressbar
-                Login.setVisibility(View.INVISIBLE);
-                Register.setVisibility(View.INVISIBLE);
-                progress.setVisibility(View.VISIBLE);
-
-                //attempt to sign in
-                auth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
+                    //get given email and passwords
+                    final String email = Email.getText().toString();
+                    final String password = Password.getText().toString();
 
 
-                        //if logged in
-                        if(task.isSuccessful())
-                        {
-                            //show the logged in fragment
-                            ((Base)getActivity()).setViewPager(2);
+                    //error checking
 
-                        }
-                        //if login failed even after the error check
-                        else
-                        {
-
-                            //setting buttons back to visible and hiding the progressbar
-                            progress.setVisibility(View.INVISIBLE);
-                            Login.setVisibility(View.VISIBLE);
-                            Register.setVisibility(View.VISIBLE);
-
-                            //if the credentials are incorrect
-                            if(task.getException() instanceof FirebaseAuthInvalidCredentialsException)
-                            {
-                                Password.setError("Invalid Password");
-                                Password.requestFocus();
-                                return;
-                            }
-                            //if there is no such user
-                            if(task.getException() instanceof FirebaseAuthInvalidUserException)
-                            {
-                                Email.setError("User does not exist!");
-                                Email.requestFocus();
-                                return;
-                            }
-
-                            //otherwise (Rare occasion)
-                            else {
-                                //Show the error textview
-                                Error.setVisibility(View.VISIBLE);
-
-                            }
-                        }
+                    //if email is empty
+                    if (email.isEmpty()) {
+                        Email.setError("Email is empty");
+                        Email.requestFocus();
+                        return;
                     }
-                });
+
+                    //if the email given is not valid
+                    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Email.setError("Please enter a valid email");
+                        Email.requestFocus();
+                        return;
+
+                    }
+
+                    //if password is empty
+                    if (password.isEmpty()) {
+                        Password.setError("Password is empty");
+                        Password.requestFocus();
+                        return;
+                    }
+
+                    //if password is smaller than 6
+                    if (password.length() < 6) {
+                        Password.setError("Minimum password length is 6");
+                        Password.requestFocus();
+                        return;
+                    }
 
 
+                    //Hiding buttons, showing progressbar
+                    Login.setVisibility(View.INVISIBLE);
+                    Register.setVisibility(View.INVISIBLE);
+                    progress.setVisibility(View.VISIBLE);
+
+                    //attempt to sign in
+                    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
 
 
+                            //if logged in
+                            if (task.isSuccessful()) {
+                                //show the logged in fragment
+                                Intent intent = new Intent(getActivity(), LoggedIn.class);
+                                startActivity(intent);
+
+                            }
+                            //if login failed even after the error check
+                            else {
+
+                                //setting buttons back to visible and hiding the progressbar
+                                progress.setVisibility(View.INVISIBLE);
+                                Login.setVisibility(View.VISIBLE);
+                                Register.setVisibility(View.VISIBLE);
+
+                                //if the credentials are incorrect
+                                if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                                    Password.setError("Invalid Password");
+                                    Password.requestFocus();
+                                    return;
+                                }
+                                //if there is no such user
+                                if (task.getException() instanceof FirebaseAuthInvalidUserException) {
+                                    Email.setError("User does not exist!");
+                                    Email.requestFocus();
+                                    return;
+                                }
+
+                                //otherwise (Rare occasion)
+                                else {
+                                    //Show the error textview
+                                    Error.setVisibility(View.VISIBLE);
+
+                                }
+                            }
+                        }
+                    });
 
 
-            }
-        });
+                }
+            });
 
+        }
+            return view;
 
-
-
-
-
-
-
-
-
-        return view;
     }
 
 

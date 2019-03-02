@@ -1,5 +1,6 @@
 package com.example.snapanote.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,7 +14,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.snapanote.Controllers.Base;
+import com.example.snapanote.Activities.Base;
+import com.example.snapanote.Activities.LoggedIn;
 import com.example.snapanote.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -177,8 +179,9 @@ public class Register extends Fragment {
                             user.updateProfile(profileUpdates);
 
 
-                            db.child("users").child(Uid).child("modules").child("test").setValue(2);
-                            ((Base)getActivity()).setViewPager(2);
+                            db.child("users").child(Uid).child("modules").child("InitialRecord001122").setValue(2);
+                            Intent intent = new Intent(getActivity(), LoggedIn.class);
+                            startActivity(intent);
 
 
                         }

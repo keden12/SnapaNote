@@ -19,7 +19,7 @@
         android:drawableStart="@drawable/ic_action_username"
         android:ems="10"
         android:hint="Username"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         android:paddingLeft="10sp"
         app:layout_constraintBottom_toTopOf="@+id/registerEmail"
         app:layout_constraintEnd_toEndOf="parent"

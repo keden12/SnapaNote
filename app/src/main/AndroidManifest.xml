@@ -12,14 +12,34 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".Application.MyApp">
 
-        <activity android:name=".Controllers.Base">
+        <activity android:name=".Activities.SplashActivity" android:theme="@style/splashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".Fragments.Notes"  android:label="NotesActivity"
+            android:parentActivityName=".Activities.Base">
+    </activity>
+        <activity android:name=".Activities.Settings"  android:label="SettingsActivity"
+            android:parentActivityName=".Activities.LoggedIn">
+        </activity>
+        <activity android:name=".Activities.Help"  android:label="HelpActivity"
+            android:parentActivityName=".Activities.LoggedIn">
+        </activity>
+        <activity android:name=".Activities.Base"  android:label="Register/Login"
+            android:parentActivityName=".Activities.Base">
+        </activity>
+        <activity android:name=".Activities.LoggedIn"  android:label="LoggedIn"
+            android:parentActivityName=".Activities.Base">
+
+
+        </activity>
+
     </application>
 </manifest>

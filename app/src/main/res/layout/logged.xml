@@ -6,39 +6,39 @@
 
 
     <LinearLayout
-        android:orientation="vertical"
-        android:background="@drawable/bgred"
-        android:weightSum="10"
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@drawable/bgred"
+        android:orientation="vertical"
+        android:weightSum="10">
 
         <RelativeLayout
-            android:layout_weight="2"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="0dp"
+            android:layout_weight="2">
 
             <TextView
                 android:id="@+id/textGrid"
-                android:text="User Panel"
-                android:textSize="34sp"
-                android:textColor="@android:color/white"
-                android:layout_centerInParent="true"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="User Panel"
+                android:textColor="@android:color/white"
+                android:textSize="34sp" />
 
         </RelativeLayout>
 
         <GridLayout
             android:id="@+id/mainGrid"
-            android:columnCount="2"
-            android:rowCount="3"
-            android:alignmentMode="alignMargins"
-            android:columnOrderPreserved="false"
-            android:layout_weight="8"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_weight="8"
+            android:alignmentMode="alignMargins"
+            android:columnCount="2"
+            android:columnOrderPreserved="false"
             android:padding="14dp"
-            >
+            android:rowCount="3">
 
             <!-- Row 1 -->
 
@@ -208,39 +208,28 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_columnWeight="1"
                 android:layout_rowWeight="1"
-                android:layout_marginBottom="16dp"
+                android:layout_columnWeight="1"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
-                app:cardElevation="8dp"
+                android:layout_marginBottom="16dp"
                 android:visibility="invisible"
                 app:cardCornerRadius="8dp"
-                >
-
+                app:cardElevation="8dp">
 
 
             </androidx.cardview.widget.CardView>
 
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_margin="16dp"
+                android:orientation="vertical">
 
 
-
-
-
-
-                <LinearLayout
-                    android:layout_gravity="center_horizontal|center_vertical"
-                    android:layout_margin="16dp"
-                    android:orientation="vertical"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-
-
-
-                </LinearLayout>
-
+            </LinearLayout>
 
 
         </GridLayout>
@@ -259,6 +248,20 @@
         android:minHeight="40dp"
         app:backgroundTint="@color/colorPrimary"
         app:navigationIcon="@drawable/ic_menu_24" />
+
+    <TextView
+        android:id="@+id/current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="-Empty-"
+        android:drawableLeft="@drawable/ic_school"
+        android:paddingRight="20dp"
+        android:paddingBottom="6dp"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:layout_anchor="@+id/linearLayout"
+        app:layout_anchorGravity="right|bottom" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/photo"

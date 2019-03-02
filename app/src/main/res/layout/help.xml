@@ -4,12 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <androidx.cardview.widget.CardView
         android:id="@+id/moduleNote"
-        android:layout_width="200dp"
-        android:visibility="gone"
-        android:layout_height="200dp"
+        android:layout_width="276dp"
+        android:layout_height="324dp"
         android:layout_rowWeight="1"
         android:layout_columnWeight="1"
         android:layout_gravity="center"
@@ -21,7 +19,7 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="259dp"
             android:layout_gravity="center_horizontal|center_vertical"
             android:layout_margin="16dp"
             android:orientation="vertical">
@@ -30,12 +28,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_school" />
+                android:src="@drawable/ic_action_help" />
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="It seems like you have no modules, please add some using the + button"
+                android:layout_height="219dp"
+                android:text="In order to take pictures, you must have a module added to your module list. After that, go to the user panel and click on the Hamburger to set the current module. Now you are ready to snap some notes. The notes will be saved in the module shown on the right side of the action bar."
                 android:textAlignment="center"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
@@ -44,34 +42,4 @@
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
-
-
-
-    <!-- Other components and views -->
-
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottombar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:minHeight="40dp"
-        app:fabAlignmentMode="end"
-        app:navigationIcon="@drawable/ic_action_delete"
-        app:backgroundTint="@color/colorPrimary" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addModules"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_action_add"
-        android:tint="#333"
-        app:backgroundTint="@color/colorWhite"
-        app:layout_anchor="@id/bottombar" />
-
-    <ListView
-        android:id="@+id/listModules"
-        android:layout_width="match_parent"
-        android:layout_height="491dp"
-        android:text="TextView" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
