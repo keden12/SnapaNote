@@ -29,6 +29,10 @@
         <activity android:name=".Activities.Settings"  android:label="SettingsActivity"
             android:parentActivityName=".Activities.LoggedIn">
         </activity>
+
+        <activity android:name=".Activities.SignInGoogle"  android:label="SignInActivity"
+            >
+        </activity>
         <activity android:name=".Activities.Help"  android:label="HelpActivity"
             android:parentActivityName=".Activities.LoggedIn">
         </activity>

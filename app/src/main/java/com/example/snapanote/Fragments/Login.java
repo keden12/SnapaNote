@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,13 @@ import android.widget.TextView;
 import com.example.snapanote.Activities.Base;
 import com.example.snapanote.Activities.LoggedIn;
 import com.example.snapanote.R;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -36,6 +44,9 @@ public class Login extends Fragment {
     private ProgressBar progress;
     private FirebaseAuth auth;
     private FirebaseUser current;
+    private SignInButton googleSignIn;
+    GoogleApiClient mGoogleApiClient;
+    private static final int RC_SIGN_IN = 9001;
 
     @Nullable
     @Override
@@ -48,6 +59,19 @@ public class Login extends Fragment {
         Register = (TextView) view.findViewById(R.id.registerbtn);
         progress = (ProgressBar) view.findViewById(R.id.logprogress);
         Error = (TextView) view.findViewById(R.id.logerror);
+        googleSignIn = (SignInButton) view.findViewById(R.id.googleSignIn);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("krP141F90FEMriM2Gv_x1Flx")
+                .requestEmail()
+                .build();
+        //mGoogleApiClient = SignInGoogle.getClient(this, gso);
+        googleSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    signIn();
+            }
+        });
 
         //getting the FirebaseAuth instance
         auth = FirebaseAuth.getInstance();
@@ -174,6 +198,35 @@ public class Login extends Fragment {
             return view;
 
     }
+
+    public void signIn()
+    {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode,int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == RC_SIGN_IN){
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
+
+
+    private void handleSignInResult(GoogleSignInResult result){
+        Log.d(TAG, "handleSignInResult:" + result.isSuccess() );
+        if(result.isSuccess()){
+            ((Base) getActivity()).setViewPager(1);
+        }
+        else{
+
+        }
+    }
+
 
 
 

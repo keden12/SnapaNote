@@ -65,6 +65,7 @@ public class Notes extends Activity {
                     imageView.setLayoutParams(new GridView.LayoutParams(420, 420));
                     imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     imageView.setPadding(4, 4, 4, 4);
+                    imageView.setRotation(90);
                 } else {
                     imageView = (ImageView) convertView;
                 }

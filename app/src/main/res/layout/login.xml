@@ -24,6 +24,14 @@
         app:layout_constraintVertical_bias="0.025"
         app:srcCompat="@drawable/snapanote1" />
 
+    <com.google.android.gms.common.SignInButton
+
+        android:id="@+id/googleSignIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteX="104dp"
+        tools:layout_editor_absoluteY="208dp" />
+
     <EditText
         android:id="@+id/logemail"
         android:layout_width="220dp"

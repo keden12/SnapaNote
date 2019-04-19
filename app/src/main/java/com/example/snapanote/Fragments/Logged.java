@@ -25,7 +25,14 @@ import com.example.snapanote.Activities.Base;
 import com.example.snapanote.Activities.Help;
 import com.example.snapanote.Activities.LoggedIn;
 import com.example.snapanote.Activities.Settings;
+import com.example.snapanote.Activities.SignInGoogle;
 import com.example.snapanote.R;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,6 +63,7 @@ public class Logged extends Fragment {
     long currentNotes = Long.valueOf(0);
     private StorageReference mRef;
     private FirebaseAuth auth;
+    GoogleApiClient mGoogleApiClient;
     DatabaseReference myRef;
     List<String> modulelist = new ArrayList<String>();
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -240,7 +248,8 @@ public class Logged extends Fragment {
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(getActivity(), Base.class);
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+                Intent intent = new Intent(getActivity(), SignInGoogle.class);
                 startActivity(intent);
                 getActivity().finish();
             }
@@ -278,6 +287,17 @@ public class Logged extends Fragment {
         getActivity().onBackPressed();
     }
 
+    @Override
+    public void onStart() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
 
 
 
