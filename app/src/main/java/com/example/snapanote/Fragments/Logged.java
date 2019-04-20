@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.snapanote.Activities.Base;
@@ -33,6 +34,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomappbar.BottomAppBar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,7 +46,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
 
@@ -51,6 +57,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Logged extends Fragment {
 
@@ -60,8 +67,7 @@ public class Logged extends Fragment {
     BottomAppBar bar;
     TextView currentPicked;
     static String SetModule = "";
-    long currentNotes = Long.valueOf(0);
-    private StorageReference mRef;
+    private StorageReference sRef;
     private FirebaseAuth auth;
     GoogleApiClient mGoogleApiClient;
     DatabaseReference myRef;
@@ -201,21 +207,7 @@ public class Logged extends Fragment {
                     dialog.show();
                 }
                 else {
-                    rootRef.addValueEventListener(new ValueEventListener() {
-                        public void onDataChange(DataSnapshot snapshot) {
-                            if(!SetModule.equals("")) {
-                                if (snapshot.child(SetModule).getValue() != null) {
-                                    currentNotes = snapshot.child(SetModule).getValue(long.class);
-                                    Log.d("MyLog", "" + currentNotes);
-                                }
-                            }
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
                    openCamera(view);
                 }
             }
@@ -308,58 +300,66 @@ public class Logged extends Fragment {
         if (requestCode == 99 && resultCode == Activity.RESULT_OK) {
             Uri uri = data.getExtras().getParcelable(ScanConstants.SCANNED_RESULT);
             Bitmap bitmap = null;
-            try {
+            AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(getActivity());
+            View addView = getLayoutInflater().inflate(R.layout.upload, null);
+
+            DialogBuilder.setView(addView);
+            final AlertDialog dialog = DialogBuilder.create();
+            dialog.show();
+
+
                 myRef = FirebaseDatabase.getInstance().getReference();
                 final FirebaseAuth auth = FirebaseAuth.getInstance();
+                sRef = FirebaseStorage.getInstance().getReference();
                 FirebaseUser user = auth.getCurrentUser();
-                String uid = user.getUid();
+                final String uid = user.getUid();
 
-                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-                File directory = new File(Environment.getExternalStorageDirectory() + "/" + SetModule);
-
-                if (!directory.exists()) {
-                    File makeDir = new File("/sdcard/"+SetModule);
-                    makeDir.mkdirs();
-                }
-                long imgIncrease = currentNotes + 1;
-                Log.d("MyTag","Current Notes="+imgIncrease);
-                myRef.child("users").child(uid).child("modules").child(SetModule).setValue(imgIncrease);
-                File file = new File(new File("/sdcard/"+SetModule), "note-"+imgIncrease);
-
-                if (file.exists()) {
-                    file.delete();
-                }
                 try {
-                    FileOutputStream out = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-                    Log.d("MyTag","Created Path"+Environment.getExternalStorageDirectory()+"/"+SetModule);
-                    out.flush();
-                    out.close();
+                    final String randomString = getRandomString(6);
+                    StorageReference storageReference = sRef.child("users/"+uid+"/"+SetModule+"/note-"+randomString);
+                    storageReference.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            Log.d("MyTag","Upload Success");
+                            taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                     @Override
+                                      public void onSuccess(Uri uri) {
+
+                                         String upload = uri.toString();
+                                         myRef.child("users").child(uid).child("modules").child(SetModule).child("note-"+randomString).child("url").setValue(upload).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                             @Override
+                                             public void onComplete(@NonNull Task<Void> task) {
+                                                 dialog.cancel();
+                                             }
+                                         });
+
+
+                                      }
+
+                            });
+
+
+                        }
+                    });
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-
-
-               /* StorageReference storageReference = mRef.child("users/"+uid+"/modules");
-                storageReference.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                        String upload = taskSnapshot.getMetadata().getReference().getDownloadUrl().toString();
-
-                        Log.d(TAG,"Upload Success");
-                    }
-                });*/
                 // getActivity().getContentResolver().delete(uri, null, null);
                 // scannedImageView.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
+    }
 
-
-
+    private static String getRandomString(final int sizeOfRandomString)
+    {
+        String ALLOWED_CHARACTERS ="0123456789qwertyuiopasdfghjklzxcvbnm";
+        final Random random=new Random();
+        final StringBuilder sb=new StringBuilder(sizeOfRandomString);
+        for(int i=0;i<sizeOfRandomString;++i)
+            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
+        return sb.toString();
     }
 
 

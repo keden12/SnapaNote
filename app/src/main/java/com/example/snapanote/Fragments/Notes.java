@@ -19,9 +19,18 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.snapanote.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 
 
@@ -30,19 +39,19 @@ public class Notes extends Activity {
         public class ImageAdapter extends BaseAdapter {
 
             private Context mContext;
-            ArrayList<String> itemList = new ArrayList<String>();
+            ArrayList<String> urls = new ArrayList<String>();
 
             public ImageAdapter(Context c) {
                 mContext = c;
             }
 
-            void add(String path) {
-                itemList.add(path);
+            void add(String url) {
+                urls.add(url);
             }
 
             @Override
             public int getCount() {
-                return itemList.size();
+                return urls.size();
             }
 
             @Override
@@ -70,94 +79,78 @@ public class Notes extends Activity {
                     imageView = (ImageView) convertView;
                 }
 
-                Bitmap bm = decodeSampledBitmapFromUri(itemList.get(position), 420, 420);
+                String url = urls.get(position);
 
-                imageView.setImageBitmap(bm);
+                Glide
+                        .with(mContext)
+                        .load(url)
+                        .into(imageView);
+
                 return imageView;
             }
 
-            public Bitmap decodeSampledBitmapFromUri(String path, int reqWidth, int reqHeight) {
-
-                Bitmap bm = null;
-                // First decode with inJustDecodeBounds=true to check dimensions
-                final BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(path, options);
-
-                // Calculate inSampleSize
-                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-                // Decode bitmap with inSampleSize set
-                options.inJustDecodeBounds = false;
-                bm = BitmapFactory.decodeFile(path, options);
-
-                return bm;
-            }
-
-            public int calculateInSampleSize(
-
-                    BitmapFactory.Options options, int reqWidth, int reqHeight) {
-                // Raw height and width of image
-                final int height = options.outHeight;
-                final int width = options.outWidth;
-                int inSampleSize = 1;
-
-                if (height > reqHeight || width > reqWidth) {
-                    if (width > height) {
-                        inSampleSize = Math.round((float) height / (float) reqHeight);
-                    } else {
-                        inSampleSize = Math.round((float) width / (float) reqWidth);
-                    }
-                }
-
-                return inSampleSize;
-            }
 
         }
 
         ImageAdapter myImageAdapter;
         CardView card;
+        DatabaseReference ref,mRef;
+        final ArrayList<String> notes = new ArrayList<String>();
+        final ArrayList<String> keys = new ArrayList<String>();
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.module);
 
-            GridView gridview = (GridView) findViewById(R.id.gridview);
+            final GridView gridview = (GridView) findViewById(R.id.gridview);
             myImageAdapter = new ImageAdapter(this);
             gridview.setAdapter(myImageAdapter);
             card = (CardView) findViewById(R.id.noteNotice);
 
-            File directory = new File(Environment.getExternalStorageDirectory() + "/" +Modules.getModuleClicked());
+            final FirebaseAuth auth = FirebaseAuth.getInstance();
+            FirebaseUser user = auth.getCurrentUser();
+            final String uid = user.getUid();
+            ref = FirebaseDatabase.getInstance().getReference().child("users").child(uid).child("modules").child(Modules.getModuleClicked());
+            ref.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    for (DataSnapshot objSnapshot: snapshot.getChildren()) {
+                        String module = objSnapshot.getKey();
+                        String noteName = objSnapshot.child(module).getKey();
+                        keys.add(noteName);
+                        Log.e("MyNote","Note -"+noteName);
 
-            if (!directory.exists()) {
-                File makeDir = new File("/sdcard/"+Modules.getModuleClicked());
-                makeDir.mkdirs();
-            }
-            String ExternalStorageDirectoryPath = Environment.getExternalStorageDirectory() + "/"+Modules.getModuleClicked();
+                        String url = objSnapshot.child("url").getValue(String.class);
+                        notes.add(url);
+                        Log.e("MyNote","URL -"+url);
+                    }
 
-            String targetPath = ExternalStorageDirectoryPath;
 
-            //Toast.makeText(getApplicationContext(), targetPath, Toast.LENGTH_LONG).show();
-            File targetDirector = new File(targetPath);
+                    if(notes.size()<1)
+                    {
+                        card.setVisibility(View.VISIBLE);
 
-            File[] files = targetDirector.listFiles();
+                    }
+                    else {
+                        card.setVisibility(View.GONE);
+                        for(int i=0; i<notes.size(); i++)
+                        {
+                            myImageAdapter.add(notes.get(i));
+                        }
+                        gridview.setOnItemClickListener(myOnItemClickListener);
 
-            if(files.length<1)
-            {
-             card.setVisibility(View.VISIBLE);
+                    }
 
-            }
-            else {
-                card.setVisibility(View.GONE);
-                for (File file : files) {
 
-                    myImageAdapter.add(file.getAbsolutePath());
                 }
+                @Override
+                public void onCancelled(DatabaseError firebaseError) {
+                    Log.e("Read failed", firebaseError.getMessage());
+                }
+            });
 
-                gridview.setOnItemClickListener(myOnItemClickListener);
 
-            }
-        }
+       }
 
     AdapterView.OnItemClickListener myOnItemClickListener
             = new AdapterView.OnItemClickListener(){
@@ -165,27 +158,19 @@ public class Notes extends Activity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position,
                                 long id) {
-            String prompt = (String)parent.getItemAtPosition(position);
-            File imgFile = new  File("/sdcard/"+Modules.getModuleClicked()+"/note-"+(position+1));
-            if(imgFile.exists()) {
+            String prompt = String.valueOf(position);
+            Toast.makeText(getApplicationContext(),
+                    prompt,
+                    Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(Notes.this);
+            View addView = getLayoutInflater().inflate(R.layout.displaynote, null);
 
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            ImageView displayNote = addView.findViewById(R.id.noteDisplay);
+            Glide.with(addView).load(notes.get(position)).into(displayNote);
 
-                AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(Notes.this);
-                View addView = getLayoutInflater().inflate(R.layout.displaynote, null);
-
-                ImageView displayNote = addView.findViewById(R.id.noteDisplay);
-
-                displayNote.setImageBitmap(myBitmap);
-                DialogBuilder.setView(addView);
-                final AlertDialog dialog = DialogBuilder.create();
-                dialog.show();
-
-            }
-
-
-            Log.d("MyTag ="," "+position);
-
+            DialogBuilder.setView(addView);
+            final AlertDialog dialog = DialogBuilder.create();
+            dialog.show();
         }};
 
 
@@ -220,6 +205,11 @@ public class Notes extends Activity {
 
 
         }
+
+
+    public void onBackPressed() {
+        finish();
+    }
 
 }
 
