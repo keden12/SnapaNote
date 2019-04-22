@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,19 +17,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.example.snapanote.Activities.Base;
 import com.example.snapanote.Activities.Help;
 import com.example.snapanote.Activities.LoggedIn;
-import com.example.snapanote.Activities.Settings;
+import com.example.snapanote.Activities.Articles;
 import com.example.snapanote.Activities.SignInGoogle;
 import com.example.snapanote.R;
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -52,9 +45,6 @@ import com.google.firebase.storage.UploadTask;
 import com.scanlibrary.ScanActivity;
 import com.scanlibrary.ScanConstants;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -231,7 +221,7 @@ public class Logged extends Fragment {
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), Settings.class);
+                Intent intent = new Intent(getActivity(), Articles.class);
                 startActivity(intent);
             }
         });

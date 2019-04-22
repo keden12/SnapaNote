@@ -17,10 +17,13 @@ import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.snapanote.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,6 +32,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -58,6 +63,11 @@ public class Notes extends Activity {
             public Object getItem(int arg0) {
                 // TODO Auto-generated method stub
                 return null;
+            }
+
+            public void clearImages()
+            {
+                urls.clear();
             }
 
             @Override
@@ -95,6 +105,8 @@ public class Notes extends Activity {
         ImageAdapter myImageAdapter;
         CardView card;
         DatabaseReference ref,mRef;
+        FirebaseStorage mFirebaseStorage;
+        GridView gridview;
         final ArrayList<String> notes = new ArrayList<String>();
         final ArrayList<String> keys = new ArrayList<String>();
         @Override
@@ -102,7 +114,7 @@ public class Notes extends Activity {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.module);
 
-            final GridView gridview = (GridView) findViewById(R.id.gridview);
+            gridview = (GridView) findViewById(R.id.gridview);
             myImageAdapter = new ImageAdapter(this);
             gridview.setAdapter(myImageAdapter);
             card = (CardView) findViewById(R.id.noteNotice);
@@ -114,6 +126,15 @@ public class Notes extends Activity {
             ref.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot snapshot) {
+                    if(notes.size()>0)
+                    {
+                        notes.clear();
+                    }
+                    if(keys.size()>0)
+                    {
+                        keys.clear();
+                    }
+                    myImageAdapter.clearImages();
                     for (DataSnapshot objSnapshot: snapshot.getChildren()) {
                         String module = objSnapshot.getKey();
                         String noteName = objSnapshot.child(module).getKey();
@@ -133,13 +154,18 @@ public class Notes extends Activity {
                     }
                     else {
                         card.setVisibility(View.GONE);
+
                         for(int i=0; i<notes.size(); i++)
                         {
+
                             myImageAdapter.add(notes.get(i));
                         }
                         gridview.setOnItemClickListener(myOnItemClickListener);
 
                     }
+
+                    myImageAdapter.notifyDataSetChanged();
+                    gridview.setAdapter(myImageAdapter);
 
 
                 }
@@ -152,25 +178,79 @@ public class Notes extends Activity {
 
        }
 
-    AdapterView.OnItemClickListener myOnItemClickListener
+           AdapterView.OnItemClickListener myOnItemClickListener
             = new AdapterView.OnItemClickListener(){
 
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position,
+        public void onItemClick(AdapterView<?> parent, View view, final int position,
                                 long id) {
             String prompt = String.valueOf(position);
-            Toast.makeText(getApplicationContext(),
-                    prompt,
-                    Toast.LENGTH_SHORT).show();
             AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(Notes.this);
             View addView = getLayoutInflater().inflate(R.layout.displaynote, null);
-
+            final int index = position;
             ImageView displayNote = addView.findViewById(R.id.noteDisplay);
+            FloatingActionButton removeNote = addView.findViewById(R.id.deleteNote);
+
             Glide.with(addView).load(notes.get(position)).into(displayNote);
 
             DialogBuilder.setView(addView);
             final AlertDialog dialog = DialogBuilder.create();
             dialog.show();
+            removeNote.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dialog.cancel();
+                    AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(Notes.this);
+                    final View addView = getLayoutInflater().inflate(R.layout.accept_delete, null);
+
+                    final FloatingActionButton delete = addView.findViewById(R.id.acceptDelete);
+                    final FloatingActionButton deny = addView.findViewById(R.id.denyDelete);
+                    final ProgressBar progress = addView.findViewById(R.id.deleteProgress);
+
+
+                    DialogBuilder.setView(addView);
+                    final AlertDialog dialog2 = DialogBuilder.create();
+                    dialog2.show();
+
+                    delete.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            delete.hide();
+                            deny.hide();
+                            progress.setVisibility(View.VISIBLE);
+                            ref.child(keys.get(index)).setValue(null);
+                            mFirebaseStorage = FirebaseStorage.getInstance();
+                            StorageReference storageRef = mFirebaseStorage.getReference();
+                            final FirebaseAuth auth = FirebaseAuth.getInstance();
+                            FirebaseUser user = auth.getCurrentUser();
+                            final String uid = user.getUid();
+                            StorageReference photoRef = storageRef.child("users").child(uid).child(Modules.getModuleClicked()).child(keys.get(index));
+
+                            photoRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("MyDelete", "onSuccess: deleted file");
+                                    dialog2.cancel();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Uh-oh, an error occurred!
+                                    Log.d("MyDelete", "onFailure: did not delete file");
+                                }
+                            });
+
+                        }
+                    });
+
+                    deny.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog2.cancel();
+                        }
+                    });
+                }
+            });
         }};
 
 
