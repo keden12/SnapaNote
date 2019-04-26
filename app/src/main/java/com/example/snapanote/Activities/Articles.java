@@ -64,7 +64,7 @@ public class Articles extends AppCompatActivity {
         //textTitle = (TextView) findViewById(R.id.articleTitle);
         //textDescription = (TextView) findViewById(R.id.articleDescription);
         //textUrl = (TextView) findViewById(R.id.articleUrl);
-        articleList = (RecyclerView) findViewById(R.id.articleRecyclerView) ;
+        articleList = (RecyclerView) findViewById(R.id.articleRecyclerView);
 
         date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
@@ -86,7 +86,7 @@ public class Articles extends AppCompatActivity {
                 for(int i=0;i<modules.size();i++) {
                     if(modules.get(i).contains(" "))
                     {
-                        String replace = modules.get(i).replace(" ", "%20%");
+                        String replace = modules.get(i).replace(" ", "%20");
                         modules.set(i,replace);
                     }
                     new FetchArticles().execute("https://newsapi.org/v2/everything?q="+modules.get(i)+"&from="+date+"&sortBy=popularity&apiKey=a2325a8864954c48b557525475860caa");
@@ -201,15 +201,18 @@ public class Articles extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
+                //if the image url is empty
                 if (imageUrl == null) {
                     imageUrl = "https://www.legendchapter.fr/wp-content/uploads/2010/12/icon_newsletter.jpg";
                 }
 
-                titles.add(title);
-                descriptions.add(description);
-                urls.add(articleUrl);
-                imgurls.add(imageUrl);
-
+                //making sure there is no duplicates
+                if(!titles.contains(title)) {
+                    titles.add(title);
+                    descriptions.add(description);
+                    urls.add(articleUrl);
+                    imgurls.add(imageUrl);
+                }
                 multiTaskHandler.taskComplete();
 
             }
