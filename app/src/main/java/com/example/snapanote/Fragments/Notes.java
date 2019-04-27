@@ -135,6 +135,8 @@ public class Notes extends Activity {
                         keys.clear();
                     }
                     myImageAdapter.clearImages();
+
+
                     for (DataSnapshot objSnapshot: snapshot.getChildren()) {
                         String module = objSnapshot.getKey();
                         String noteName = objSnapshot.child(module).getKey();
@@ -146,12 +148,18 @@ public class Notes extends Activity {
                         Log.e("MyNote","URL -"+url);
                     }
 
+                    if(keys.size()>1 && keys.contains("empty"))
+                    {
+                        ref.child("empty").setValue(null);
+                        keys.remove("empty");
+                        notes.remove("yes");
+                    }
 
-                    if(notes.size()<1)
+                    if(keys.contains("empty")||notes.size()<1)
                     {
                         card.setVisibility(View.VISIBLE);
-
                     }
+
                     else {
                         card.setVisibility(View.GONE);
 
@@ -218,7 +226,16 @@ public class Notes extends Activity {
                             delete.hide();
                             deny.hide();
                             progress.setVisibility(View.VISIBLE);
+                            Boolean checkEmpty = false;
+                            if(notes.size() == 1)
+                            {
+                                checkEmpty = true;
+                            }
                             ref.child(keys.get(index)).setValue(null);
+                            if(checkEmpty == true)
+                            {
+                                ref.child("empty").setValue("yes");
+                            }
                             mFirebaseStorage = FirebaseStorage.getInstance();
                             StorageReference storageRef = mFirebaseStorage.getReference();
                             final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -230,6 +247,7 @@ public class Notes extends Activity {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Log.d("MyDelete", "onSuccess: deleted file");
+
                                     dialog2.cancel();
                                 }
                             }).addOnFailureListener(new OnFailureListener() {

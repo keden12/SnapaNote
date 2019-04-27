@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.example.snapanote.R;
@@ -37,6 +38,7 @@ import java.util.concurrent.ExecutionException;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -54,7 +56,8 @@ public class Articles extends AppCompatActivity {
     RecyclerView.LayoutManager mLayoutManager;
     RecyclerView.Adapter mAdapter;
     MultiTaskHandler multiTaskHandler;
-
+    CardView note;
+    int count = 0;
     DatabaseReference myRef;
 
     @Override
@@ -65,6 +68,7 @@ public class Articles extends AppCompatActivity {
         //textDescription = (TextView) findViewById(R.id.articleDescription);
         //textUrl = (TextView) findViewById(R.id.articleUrl);
         articleList = (RecyclerView) findViewById(R.id.articleRecyclerView);
+        note = (CardView) findViewById(R.id.articleNote);
 
         date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
@@ -99,12 +103,18 @@ public class Articles extends AppCompatActivity {
                 multiTaskHandler = new MultiTaskHandler(totalNumOfTasks) {
                     @Override
                     protected void onAllTasksCompleted() {
-                        articleList.setHasFixedSize(true);
-                        mLayoutManager = new LinearLayoutManager(Articles.this);
-                        mAdapter = new MainAdapter(titles,descriptions,urls,imgurls);
-                        Log.d("MyCount",""+titles.size());
-                        articleList.setLayoutManager(mLayoutManager);
-                        articleList.setAdapter(mAdapter);
+                        if(count == 0)
+                        {
+                            note.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            articleList.setHasFixedSize(true);
+                            mLayoutManager = new LinearLayoutManager(Articles.this);
+                            mAdapter = new MainAdapter(titles, descriptions, urls, imgurls);
+                            Log.d("MyCount", "" + titles.size());
+                            articleList.setLayoutManager(mLayoutManager);
+                            articleList.setAdapter(mAdapter);
+                        }
                     }
                 };
 
@@ -157,8 +167,7 @@ public class Articles extends AppCompatActivity {
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line + "\n");
-                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
-
+                    Log.d("Response: ", "> " + line);
                 }
 
                 return buffer.toString();
@@ -201,18 +210,23 @@ public class Articles extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                //if the image url is empty
-                if (imageUrl == null) {
-                    imageUrl = "https://www.legendchapter.fr/wp-content/uploads/2010/12/icon_newsletter.jpg";
+                if(title != null)
+                {
+                    count++;
+                    //if the image url is empty
+                    if (imageUrl == null) {
+                        imageUrl = "https://www.legendchapter.fr/wp-content/uploads/2010/12/icon_newsletter.jpg";
+                    }
+
+                    //making sure there is no duplicates
+                    if(!titles.contains(title)) {
+                        titles.add(title);
+                        descriptions.add(description);
+                        urls.add(articleUrl);
+                        imgurls.add(imageUrl);
+                    }
                 }
 
-                //making sure there is no duplicates
-                if(!titles.contains(title)) {
-                    titles.add(title);
-                    descriptions.add(description);
-                    urls.add(articleUrl);
-                    imgurls.add(imageUrl);
-                }
                 multiTaskHandler.taskComplete();
 
             }

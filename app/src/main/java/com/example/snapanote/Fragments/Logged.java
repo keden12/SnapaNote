@@ -11,12 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.example.snapanote.Activities.Help;
@@ -24,6 +27,8 @@ import com.example.snapanote.Activities.LoggedIn;
 import com.example.snapanote.Activities.Articles;
 import com.example.snapanote.Activities.SignInGoogle;
 import com.example.snapanote.R;
+import com.example.snapanote.Utils.MainAdapter;
+import com.example.snapanote.Utils.MultiTaskHandler;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -48,12 +53,13 @@ import com.scanlibrary.ScanConstants;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Logged extends Fragment {
 
     FloatingActionButton camera;
     ImageView scannedImageView;
-    CardView modules,help,settings,logout;
+    CardView modules,help,article,logout;
     BottomAppBar bar;
     TextView currentPicked;
     static String SetModule = "";
@@ -61,6 +67,7 @@ public class Logged extends Fragment {
     private FirebaseAuth auth;
     GoogleApiClient mGoogleApiClient;
     DatabaseReference myRef;
+    MultiTaskHandler multiTaskHandler;
     List<String> modulelist = new ArrayList<String>();
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.logged, container, false);
@@ -70,7 +77,7 @@ public class Logged extends Fragment {
         modules = (CardView) view.findViewById(R.id.moduleCard);
         help = (CardView) view.findViewById(R.id.helpCard);
         currentPicked = (TextView) view.findViewById(R.id.current);
-        settings = (CardView) view.findViewById(R.id.settingsCard);
+        article = (CardView) view.findViewById(R.id.articleCard);
         logout = (CardView) view.findViewById(R.id.logoutCard);
 
         final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -85,7 +92,7 @@ public class Logged extends Fragment {
         bar.setNavigationOnClickListener(new View.OnClickListener() {
                                              @Override
                                              public void onClick(View v) {
-                                                 rootRef.addValueEventListener(new ValueEventListener() {
+                                                 rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                                      @Override
                                                      public void onDataChange(DataSnapshot snapshot) {
                                                          modulelist = new ArrayList<String>();
@@ -100,6 +107,7 @@ public class Logged extends Fragment {
                                                          } else {
                                                              currentPicked.setText(SetModule);
                                                          }
+                                                         multiTaskHandler.taskComplete();
 
 
                                                      }
@@ -121,50 +129,51 @@ public class Logged extends Fragment {
                                                      dialog.show();
                                                  }*/
 
+                                                 multiTaskHandler = new MultiTaskHandler(1) {
+                                                     @Override
+                                                     protected void onAllTasksCompleted() {
+
+                                                         AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(getActivity());
+                                                         View addView = getLayoutInflater().inflate(R.layout.setmodule, null);
+                                                         final NumberPicker currentModule = (NumberPicker) addView.findViewById(R.id.selectModule);
+                                                         FloatingActionButton submitCurrentModule = (FloatingActionButton) addView.findViewById(R.id.submitCurrentModule);
+                                                         currentModule.setMinValue(0);
+                                                         currentModule.setMaxValue(modulelist.size()-1);
+                                                         String[] displayValues = new String[modulelist.size()];
+                                                         displayValues = modulelist.toArray(displayValues);
+                                                         currentModule.setDisplayedValues(displayValues);
+                                                         currentModule.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+                                                         DialogBuilder.setView(addView);
+                                                         final AlertDialog dialog = DialogBuilder.create();
+                                                         dialog.show();
+
+                                                         submitCurrentModule.setOnClickListener(new View.OnClickListener() {
+                                                             @Override
+                                                             public void onClick(View v) {
 
 
-                                                     AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(getActivity());
-                                                     View addView = getLayoutInflater().inflate(R.layout.setmodule, null);
-                                                     final EditText currentModule = (EditText) addView.findViewById(R.id.currentModule);
-                                                     FloatingActionButton submitCurrentModule = (FloatingActionButton) addView.findViewById(R.id.submitCurrentModule);
-                                                     DialogBuilder.setView(addView);
-                                                     final AlertDialog dialog = DialogBuilder.create();
-                                                     dialog.show();
-
-                                                     submitCurrentModule.setOnClickListener(new View.OnClickListener() {
-                                                         @Override
-                                                         public void onClick(View v) {
-                                                             Boolean checkIfModuleExists = false;
-                                                             String getModule = currentModule.getText().toString();
-
-                                                             for (int i = 0; i < modulelist.size(); i++) {
-                                                                 Log.d("MyTag", modulelist.get(i));
-
-                                                                 if(getModule.equals(modulelist.get(i))) {
-                                                                     checkIfModuleExists = true;
-
-                                                                 }
-                                                             }
-
-                                                             if(checkIfModuleExists)
-                                                             {
+                                                                 String getModule = modulelist.get(currentModule.getValue());
                                                                  SetModule = getModule;
                                                                  currentPicked.setText(getModule);
                                                                  dialog.cancel();
+
+
                                                              }
-                                                             else
-                                                             {
-                                                                 currentModule.setError("Module doesn't exist");
-                                                             }
-                                                         }
 
-                                                     });
+                                                         });
 
+                                                     }
+                                                 };
 
+                                                 }
 
 
 
-                                             }
+
+
+
+
+
                                          });
 
         camera.setOnClickListener(new View.OnClickListener() {
@@ -218,7 +227,7 @@ public class Logged extends Fragment {
             }
         });
 
-        settings.setOnClickListener(new View.OnClickListener() {
+        article.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), Articles.class);

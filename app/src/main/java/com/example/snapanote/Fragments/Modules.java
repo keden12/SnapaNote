@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import com.example.snapanote.R;
@@ -134,7 +135,7 @@ public class Modules extends Fragment {
         bar.setNavigationOnClickListener(new View.OnClickListener() {
                                              @Override
                                              public void onClick(View v) {
-                                                 rootRef.addValueEventListener(new ValueEventListener() {
+                                                 rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
 
 
                                                                                    @Override
@@ -151,10 +152,18 @@ public class Modules extends Fragment {
 
                                                                                    }
                                                                                });
+
+
                                                  AlertDialog.Builder DialogBuilder = new AlertDialog.Builder(getActivity());
                                                  View addView = getLayoutInflater().inflate(R.layout.moduledelete, null);
-                                                 final EditText deleteModule = (EditText) addView.findViewById(R.id.deleteModuleName);
+                                                 final NumberPicker deleteModule = (NumberPicker) addView.findViewById(R.id.modulePicker);
                                                  FloatingActionButton submitDelete = (FloatingActionButton) addView.findViewById(R.id.submitDelete);
+                                                 deleteModule.setMinValue(0);
+                                                 deleteModule.setMaxValue(modulelist.size()-1);
+                                                 String[] displayValues = new String[modulelist.size()];
+                                                 displayValues = modulelist.toArray(displayValues);
+                                                 deleteModule.setDisplayedValues(displayValues);
+                                                 deleteModule.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
                                                  DialogBuilder.setView(addView);
                                                  final AlertDialog dialog = DialogBuilder.create();
                                                  dialog.show();
@@ -162,21 +171,7 @@ public class Modules extends Fragment {
                                                  submitDelete.setOnClickListener(new View.OnClickListener() {
                                                      @Override
                                                      public void onClick(View v) {
-                                                         Boolean checkIfModuleExists = false;
-                                                         String getModule = deleteModule.getText().toString();
-                                                         for (int i = 0; i < modulelist.size(); i++) {
-                                                             Log.d("MyTag", modulelist.get(i));
-
-                                                             if(getModule.equals(modulelist.get(i))) {
-                                                                 checkIfModuleExists = true;
-
-                                                             }
-                                                         }
-
-
-
-                                                         if(checkIfModuleExists)
-                                                         {
+                                                         String getModule = modulelist.get(deleteModule.getValue());
 
                                                              if(Logged.getCurrentSetModule().equals(getModule))
                                                              {
@@ -186,26 +181,12 @@ public class Modules extends Fragment {
                                                              {
                                                                  rootRef.child("InitialRecord001122").setValue(2);
                                                              }
-                                                             //Delete all local contents of the module
-                                                             File dir = new File(Environment.getExternalStorageDirectory() + "/" + getModule);
-                                                             if (dir.isDirectory())
-                                                             {
-                                                                 String[] children = dir.list();
-                                                                 for (int i = 0; i < children.length; i++)
-                                                                 {
-                                                                     new File(dir, children[i]).delete();
-                                                                 }
-                                                             }
                                                              rootRef.child(getModule).removeValue();
 
                                                              dialog.cancel();
 
 
 
-                                                         } else
-                                                         {
-                                                             deleteModule.setError("Module does not exist");
-                                                         }
 
                                                      }
                                                  });
