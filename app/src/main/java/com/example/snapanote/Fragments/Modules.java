@@ -75,36 +75,39 @@ public class Modules extends Fragment {
                         modulelist.add(String.valueOf(postSnapshot.getKey()));
                     }
                 }
-                else{
+                else {
                     note.setVisibility(View.INVISIBLE);
                     listmodules.setVisibility(View.VISIBLE);
                     modulelist = new ArrayList<String>();
-                    Log.e("Count " ,""+snapshot.getChildrenCount());
-                    for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+                    Log.e("Count ", "" + snapshot.getChildrenCount());
+                    for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                         modulelist.add(String.valueOf(postSnapshot.getKey()));
                     }
-                    ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                            getActivity(),
-                            android.R.layout.simple_list_item_1,
-                            modulelist ){
-                        @Override
-                        public View getView(int position, View convertView, ViewGroup parent){
-                            // Get the Item from ListView
-                            View view = super.getView(position, convertView, parent);
+                    if (getActivity() != null) {
+                        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                                getActivity(),
+                                android.R.layout.simple_list_item_1,
+                                modulelist) {
+                            @Override
+                            public View getView(int position, View convertView, ViewGroup parent) {
+                                // Get the Item from ListView
+                                View view = super.getView(position, convertView, parent);
 
-                            // Initialize a TextView for ListView each Item
-                            TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                                // Initialize a TextView for ListView each Item
+                                TextView tv = (TextView) view.findViewById(android.R.id.text1);
 
-                            // Set the text color of TextView (ListView Item)
-                            tv.setTextColor(Color.BLACK);
-                            tv.setTextSize(22);
-                            tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_school, 0, 0, 0);
+                                // Set the text color of TextView (ListView Item)
+                                tv.setTextColor(Color.BLACK);
+                                tv.setTextSize(22);
+                                tv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_school, 0, 0, 0);
 
 
-                            // Generate ListView Item using TextView
-                            return view;
-                        }
-                    };
+
+                                // Generate ListView Item using TextView
+                                return view;
+                            }
+                        };
+
 
                     listmodules.setAdapter(arrayAdapter);
 
@@ -113,13 +116,14 @@ public class Modules extends Fragment {
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 
-                            String pos= modulelist.get(position);
+                            String pos = modulelist.get(position);
                             moduleClicked = modulelist.get(position);
-                            Log.d("MyTag",pos);
+                            Log.d("MyTag", pos);
                             Intent intent = new Intent(getActivity(), Notes.class);
                             startActivity(intent);
                         }
                     });
+                }
                 }
 
             }

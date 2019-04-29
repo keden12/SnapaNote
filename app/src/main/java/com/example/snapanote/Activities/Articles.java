@@ -59,6 +59,7 @@ public class Articles extends AppCompatActivity {
     CardView note;
     int count = 0;
     DatabaseReference myRef;
+    ProgressDialog dialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,9 @@ public class Articles extends AppCompatActivity {
         //textUrl = (TextView) findViewById(R.id.articleUrl);
         articleList = (RecyclerView) findViewById(R.id.articleRecyclerView);
         note = (CardView) findViewById(R.id.articleNote);
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Please wait...");
+        dialog.show();
 
         date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
@@ -103,6 +107,7 @@ public class Articles extends AppCompatActivity {
                 multiTaskHandler = new MultiTaskHandler(totalNumOfTasks) {
                     @Override
                     protected void onAllTasksCompleted() {
+                        dialog.dismiss();
                         if(count == 0)
                         {
                             note.setVisibility(View.VISIBLE);
@@ -114,6 +119,7 @@ public class Articles extends AppCompatActivity {
                             Log.d("MyCount", "" + titles.size());
                             articleList.setLayoutManager(mLayoutManager);
                             articleList.setAdapter(mAdapter);
+
                         }
                     }
                 };

@@ -3,6 +3,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
@@ -198,12 +199,35 @@ public class Notes extends Activity {
             final int index = position;
             ImageView displayNote = addView.findViewById(R.id.noteDisplay);
             FloatingActionButton removeNote = addView.findViewById(R.id.deleteNote);
+            FloatingActionButton shareNote = addView.findViewById(R.id.shareNote);
 
             Glide.with(addView).load(notes.get(position)).into(displayNote);
 
             DialogBuilder.setView(addView);
             final AlertDialog dialog = DialogBuilder.create();
             dialog.show();
+            shareNote.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent
+                            .putExtra(Intent.EXTRA_TEXT,
+                                    notes.get(index));
+                    sendIntent.setType("text/plain");
+                    sendIntent.setPackage("com.facebook.orca");
+                    try {
+                        startActivity(sendIntent);
+                    }
+                    catch (android.content.ActivityNotFoundException ex) {
+                        Toast.makeText(Notes.this,"Please Install Facebook Messenger", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+            });
+
+
             removeNote.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

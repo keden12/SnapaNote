@@ -46,7 +46,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
             @Override
             public void onClick(View v) {
 
-                Toast.makeText(parentContext, "Recycle Click" + position, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(position)));
                 parentContext.startActivity(intent);
             }
