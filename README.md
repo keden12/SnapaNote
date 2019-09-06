@@ -1,4 +1,5 @@
 # SnapaNote
+This app is targeted at students.
 An Android app which organises your Notes!
 
 You can add your modules and then snap some pictures of the notes and they will be automatically saved to your modules.
